@@ -9,21 +9,42 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Building application...'
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                sh 'ruff check .'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
+                sh 'pytest'
             }
         }
+        stage('Docker Build') {
+    steps {
+        sh 'docker build -t jenkins-production-cicd:1.0 .'
+    }
+}
+stage('Health Check') {
+    steps {
+        sh 'curl http://localhost:5000/health'
+    }
+}
+stage('Health Check') {
+    steps {
+        sh 'curl http://localhost:5000/health'
+    }
+}
 
-        stage('Deploy') {
+        stage('Build') {
             steps {
-                echo 'Deploying application...'
+                echo 'Application build completed.'
             }
         }
     }
@@ -31,11 +52,11 @@ pipeline {
     post {
 
         success {
-            echo 'CI/CD pipeline succeeded.'
+            echo 'CI pipeline succeeded.'
         }
 
         failure {
-            echo 'CI/CD pipeline failed.'
+            echo 'CI pipeline failed.'
         }
 
         always {
